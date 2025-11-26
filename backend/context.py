@@ -43,10 +43,13 @@ For each vulnerability found (from both semgrep and your own analysis), provide:
 Be thorough and practical in your analysis. Don't duplicate issues between semgrep results and your own findings.
 """
 
-def get_analysis_prompt(code: str) -> str:
+def get_analysis_prompt(files: list[dict[str, str]]) -> str:
     """Generate the analysis prompt for the security agent."""
-    return f"Please analyze the following Python code for security vulnerabilities:\n\n{code}"
+    prompt = "Please analyze the following Python code files for security vulnerabilities:\n\n"
+    for file in files:
+        prompt += f"File: {file['filename']}\n```python\n{file['content']}\n```\n\n"
+    return prompt
 
-def enhance_summary(code_length: int, agent_summary: str) -> str:
+def enhance_summary(file_count: int, agent_summary: str) -> str:
     """Enhance the agent's summary with additional context."""
-    return f"Analyzed {code_length} characters of Python code. {agent_summary}"
+    return f"Analyzed {file_count} files. {agent_summary}"

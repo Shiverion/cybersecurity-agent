@@ -220,3 +220,6 @@ terraform.tfstate.d/
 # Variable files that might contain secrets
 *.auto.tfvars
 terraform.tfvars
+
+# Week3
+week3/.

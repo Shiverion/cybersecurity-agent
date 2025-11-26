@@ -1,14 +1,13 @@
 import os
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from typing import List
 from dotenv import load_dotenv
 from agents import Agent, Runner, trace
-
-from context import SECURITY_RESEARCHER_INSTRUCTIONS, get_analysis_prompt, enhance_summary
 from mcp_servers import create_semgrep_server
+from context import SECURITY_RESEARCHER_INSTRUCTIONS, get_analysis_prompt, enhance_summary
 
 load_dotenv()
 
@@ -78,18 +77,18 @@ def create_security_agent(semgrep_server) -> Agent:
     )
 
 
-async def run_security_analysis(code: str) -> SecurityReport:
+async def run_security_analysis(files: List[dict[str, str]]) -> SecurityReport:
     """Execute the security analysis workflow."""
     with trace("Security Researcher"):
         async with create_semgrep_server() as semgrep:
             agent = create_security_agent(semgrep)
-            result = await Runner.run(agent, input=get_analysis_prompt(code))
+            result = await Runner.run(agent, input=get_analysis_prompt(files))
             return result.final_output_as(SecurityReport)
 
 
-def format_analysis_response(code: str, report: SecurityReport) -> SecurityReport:
+def format_analysis_response(file_count: int, report: SecurityReport) -> SecurityReport:
     """Format the final analysis response."""
-    enhanced_summary = enhance_summary(len(code), report.summary)
+    enhanced_summary = enhance_summary(file_count, report.summary)
     return SecurityReport(summary=enhanced_summary, issues=report.issues)
 
 
@@ -105,8 +104,39 @@ async def analyze_code(request: AnalyzeRequest) -> SecurityReport:
     check_api_keys()
 
     try:
-        report = await run_security_analysis(request.code)
-        return format_analysis_response(request.code, report)
+        files = [{"filename": "main.py", "content": request.code}]
+        report = await run_security_analysis(files)
+        return format_analysis_response(1, report)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+
+
+@app.post("/api/analyze-files", response_model=SecurityReport)
+async def analyze_files(files: List[UploadFile] = File(...)) -> SecurityReport:
+    """
+    Analyze multiple Python files for security vulnerabilities.
+    """
+    check_api_keys()
+
+    if not files:
+        raise HTTPException(status_code=400, detail="No files uploaded")
+
+    file_contents = []
+    for file in files:
+        if file.filename.endswith('.py'):
+            content = await file.read()
+            try:
+                text_content = content.decode('utf-8')
+                file_contents.append({"filename": file.filename, "content": text_content})
+            except UnicodeDecodeError:
+                continue  # Skip non-text files
+
+    if not file_contents:
+        raise HTTPException(status_code=400, detail="No valid Python files found in upload")
+
+    try:
+        report = await run_security_analysis(file_contents)
+        return format_analysis_response(len(file_contents), report)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
