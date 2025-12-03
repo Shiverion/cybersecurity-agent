@@ -33,7 +33,7 @@ A powerful web application that leverages AI agents and Semgrep to analyze Pytho
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Shiverion/cybersecurity-agent.git
 cd cyber
 ```
 
