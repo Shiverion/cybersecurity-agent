@@ -1,23 +1,102 @@
-# Cyber-Security Agent
+# Cybersecurity Analyzer Agent
 
-## A Code Analyzer via Semgrep MCP server for Azure and GCP
+A powerful web application that leverages AI agents and Semgrep to analyze Python code for security vulnerabilities. This tool combines the precision of static analysis with the reasoning capabilities of Large Language Models to provide actionable security insights.
 
-![Course Image](assets/cyber.png)
+![Project Banner](assets/cyber.png)
 
-_If you're looking at this in Cursor, please right click on the filename in the Explorer on the left, and select "Open preview", to view it in formatted glory._
+## 🚀 Features
 
-### Welcome to the Week 3 Days 1 and 2 project..
+- **AI-Powered Analysis**: Uses OpenAI's agents to interpret code context and security implications.
+- **Static Analysis Integration**: Integrates with Semgrep via MCP (Model Context Protocol) for deep code scanning.
+- **Interactive Interface**: User-friendly chat interface for discussing vulnerabilities and fixes.
+- **Multi-Cloud Deployment**: Ready-to-deploy configurations for Azure Container Apps and Google Cloud Run.
+- **Modern Stack**: Built with Next.js 14, TypeScript, Tailwind CSS, and FastAPI.
 
-Please clone this repo:
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js (React), TypeScript, Tailwind CSS
+- **Backend**: FastAPI, Python 3.12
+- **AI/ML**: OpenAI Agents SDK, Semgrep MCP Server
+- **Infrastructure**: Docker, Terraform
+- **Cloud**: Azure Container Apps, Google Cloud Run
+
+## 📋 Prerequisites
+
+- Node.js 18+ and npm
+- Python 3.12+
+- Docker (for containerized deployment)
+- OpenAI API Key
+- Semgrep App Token (optional, for enhanced rules)
+
+## ⚡ Quick Start
+
+### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/ed-donner/cyber.git
+git clone <repository-url>
+cd cyber
 ```
 
-Then open this as a project in Cursor; then head into the week3 directory and start with guide "day1.part0" - right click and select "Open Preview".
+### 2. Environment Setup
 
-#### Keep in mind
+Create a `.env` file in the root directory:
 
-- Please submit your community_contributions, including links to your repos, in the production repo community_contributions folder
-- Regularly do a git pull to get the latest code
-- Reach out in Udemy or email (ed@edwarddonner.com) if I can help!
+```env
+OPENAI_API_KEY=your_openai_api_key_here
+SEMGREP_APP_TOKEN=your_semgrep_token_here
+```
+
+### 3. Run Locally
+
+**Backend:**
+
+```bash
+cd backend
+# Install dependencies and run
+uv run server.py
+# The server will start on http://localhost:8000
+```
+
+**Frontend:**
+
+```bash
+cd frontend
+npm install
+npm run dev
+# The app will be available at http://localhost:3000
+```
+
+## 🐳 Docker Support
+
+Build and run the entire application as a single container:
+
+```bash
+# Build the image
+docker build -t cyber-analyzer .
+
+# Run the container
+docker run --rm -d --name cyber-analyzer -p 8000:8000 --env-file .env cyber-analyzer
+```
+
+Access the application at `http://localhost:8000`.
+
+## ☁️ Deployment
+
+The project includes Terraform configurations for deploying to major cloud providers.
+
+### Azure
+Navigate to `terraform/azure` to deploy to Azure Container Apps.
+
+### Google Cloud Platform
+Navigate to `terraform/gcp` to deploy to Google Cloud Run.
+
+## 📂 Project Structure
+
+- `backend/`: FastAPI server and AI agent logic.
+- `frontend/`: Next.js web application.
+- `terraform/`: Infrastructure as Code for Azure and GCP.
+- `assets/`: Project images and resources.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
