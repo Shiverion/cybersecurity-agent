@@ -37,11 +37,11 @@ resource "google_project_service" "cloudbuild" {
 
 # Configure Docker provider to use GCR
 provider "docker" {
-  registry_auth {
-    address  = "${var.region}-docker.pkg.dev"
-    username = "oauth2accesstoken"
-    password = data.google_client_config.default.access_token
-  }
+  # registry_auth {
+  #   address  = "${var.region}-docker.pkg.dev"
+  #   username = "oauth2accesstoken"
+  #   password = data.google_client_config.default.access_token
+  # }
 }
 
 # Get current project configuration
@@ -73,14 +73,14 @@ resource "docker_image" "app" {
 }
 
 # Push Docker image to Artifact Registry
-resource "docker_registry_image" "app" {
-  name = docker_image.app.name
-  
-  depends_on = [
-    google_artifact_registry_repository.app,
-    docker_image.app
-  ]
-}
+# resource "docker_registry_image" "app" {
+#   name = docker_image.app.name
+#   
+#   depends_on = [
+#     google_artifact_registry_repository.app,
+#     docker_image.app
+#   ]
+# }
 
 # Deploy to Cloud Run
 resource "google_cloud_run_service" "app" {
@@ -141,7 +141,7 @@ resource "google_cloud_run_service" "app" {
 
   depends_on = [
     google_project_service.cloudrun,
-    docker_registry_image.app
+    # docker_registry_image.app
   ]
 }
 
