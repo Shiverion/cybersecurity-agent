@@ -28,6 +28,55 @@ A powerful web application that leverages AI agents and Semgrep to analyze Pytho
 - OpenAI API Key
 - Semgrep App Token (optional, for enhanced rules)
 
+## System Design
+
+### Requirements
+
+**Functional**
+- Analyze submitted Python source with Semgrep and an OpenAI agent, then return a structured report of issues and fixes.
+- Accept either one code string or multiple uploaded `.py` files.
+
+**Non-functional**
+- The API key is read on the server; results are validated against Pydantic response models.
+- Analysis runs synchronously and depends on OpenAI plus a Semgrep MCP subprocess.
+
+### High-Level Architecture
+
+```text
+Next.js static export → FastAPI /api/analyze or /api/analyze-files
+                         → OpenAI Agents SDK (GPT-4.1 mini)
+                         → Semgrep MCP stdio tool
+                         → Pydantic security report
+```
+
+The multi-stage Dockerfile builds the frontend and serves its static output from FastAPI.
+
+### Data Model / API Contract
+
+| Endpoint | Input | Output |
+| --- | --- | --- |
+| `/api/analyze` | Python code string | Summary and issues |
+| `/api/analyze-files` | Multiple uploaded `.py` files | Summary and issues |
+| `/health` | None | Service health response |
+
+### Scale and Reliability
+
+- Each analysis starts the Semgrep MCP server and waits for the agent result; no job queue or explicit request quota is configured.
+- The API routes do not add authentication or rate limiting in the current implementation.
+
+### Trade-offs
+
+| Decision | Benefit | Cost |
+| --- | --- | --- |
+| Combine static scanning with model review | Pair rule findings with explanatory context | A report still needs expert validation |
+| Return one synchronous response | Simple client contract | Large inputs or provider delays hold the request open |
+
+### What to Revisit as It Grows
+
+- Add authentication, rate limits, and an explicit maximum request size before public exposure.
+- Persist bounded analysis jobs for large multi-file submissions.
+- Pin and monitor the Semgrep MCP dependency and provider model behavior.
+
 ## ⚡ Quick Start
 
 ### 1. Clone the Repository
